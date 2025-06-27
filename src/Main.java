@@ -239,8 +239,20 @@ public class Main {
     }
 
     public static boolean checkLostInGame(int numOfErrors) {
+        switch (numOfErrors) {
+            case 6, 5:
+                System.out.println("Осталось " + numOfErrors + " ошибок.");
+                break;
+            case 4, 3, 2:
+                System.out.println("Осталось " + numOfErrors + " ошибки.");
+                break;
+            case 1:
+                System.out.println("Осталась " + numOfErrors + " ошибка.");
+                break;
+            default:
+                break;
+        }
 
-        System.out.println("Осталось " + numOfErrors + " ошибок.");
         if (numOfErrors == 0) {
             System.out.println("Вы проиграли...");
             System.out.println();
