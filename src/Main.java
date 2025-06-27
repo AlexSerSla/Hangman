@@ -146,8 +146,7 @@ public class Main {
         }
     }
 
-    public static int getRandomNuber(int minNumber, int maxNumber)
-    {
+    public static int getRandomNuber(int minNumber, int maxNumber) {
         maxNumber -= minNumber;
         return (int) (Math.random() * ++maxNumber) + minNumber;
     }
