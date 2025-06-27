@@ -1,13 +1,18 @@
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class Main {
 
     private static Scanner scanner = new Scanner(System.in);
 
+    static List<String> dictionaryList = new ArrayList<>();
     static List<Character> usedLettersList = new ArrayList<>();
     static List<Character> hiddenWordList = new ArrayList<>();
     static List<Character> displayWordList = new ArrayList<>();
+
 
     static String[][] lostState = {{"┌───┐",
                                     "│",
@@ -49,6 +54,7 @@ public class Main {
     private static int numOfErrors = 7;
 
     public static void main(String[] args) {
+        readDictionaryInList();
         controlGame();
     }
 
@@ -117,10 +123,38 @@ public class Main {
         }
     }
 
+    public static void readDictionaryInList(){
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader("src/dictionary.txt"));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                dictionaryList.add(line.toUpperCase());
+            }
+
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения файла: " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                System.err.println("Ошибка закрытия файла: " + e.getMessage());
+            }
+        }
+    }
+
+    public static int getRandomNuber(int minNumber, int maxNumber)
+    {
+        maxNumber -= minNumber;
+        return (int) (Math.random() * ++maxNumber) + minNumber;
+    }
+
     public static String chooseHiddenWord(){
-        //тут алгоритм выбора слова из словаря в файле
-        //необходимо создать файл
-        return "ЛАМПА";
+        int randomNumberWord = getRandomNuber(0, dictionaryList.size() - 1);
+        return dictionaryList.get(randomNumberWord);
     }
 
     public static void printHiddenWord (List<Character> displayWordList) {
