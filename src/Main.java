@@ -255,6 +255,7 @@ public class Main {
 
         if (numOfErrors == 0) {
             System.out.println("Вы проиграли...");
+            printHiddenWord(hiddenWordList);
             System.out.println();
             return true;
         } else {
