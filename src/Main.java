@@ -97,7 +97,7 @@ public class Main {
 
     //==================================================================================================================
     public static boolean getStartGame() {
-        do {
+        while (true) {
             System.out.println("Введите <start> для начала новой игры, введите <exit> для выхода");
 
             String inputWord = scanner.nextLine().toUpperCase();
@@ -107,7 +107,7 @@ public class Main {
             } else if (inputWord.equals("EXIT")){
                 return false;
             }
-        } while (true);
+        }
     }
 
     public static void splitWordAsLetters(String hiddenWord) {
@@ -139,7 +139,7 @@ public class Main {
     }
 
     public static char getUserLetter() {
-        do {
+        while (true) {
             System.out.println("");
             System.out.println("Введите букву");
 
@@ -157,7 +157,7 @@ public class Main {
             } else {
                 System.out.println("Вы ввели: " + inputLetter + ". Необходимо ввести букву.");
             }
-        } while (true);
+        }
     }
 
     public static boolean checkInputLetterUsed(char inputLetter) {
