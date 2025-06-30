@@ -6,15 +6,20 @@ import java.util.*;
 
 public class Main {
 
-    private static Scanner scanner = new Scanner(System.in);
+    private final static Scanner scanner = new Scanner(System.in);
 
-    static List<String> dictionaryList = new ArrayList<>();
-    static List<Character> usedLettersList = new ArrayList<>();
-    static List<Character> hiddenWordList = new ArrayList<>();
-    static List<Character> displayWordList = new ArrayList<>();
+    private final static List<String> dictionary = new ArrayList<>();
+    private final static List<Character> usedLetters = new ArrayList<>();
+    private final static List<Character> hiddenWord = new ArrayList<>();
+    private final static List<Character> displayWord = new ArrayList<>();
 
+    private final static String START = "1";
+    private final static String EXIT = "0";
+    private final static int MAX_MISTAKES = 7;
 
-    static String[][] lostState = {{"┌───┐",
+    private static int numOfErrors = MAX_MISTAKES;
+
+    private final static String[][] hangmanPictures = {{"┌───┐",
                                     "│",
                                     "│",
                                     "│",
@@ -51,48 +56,48 @@ public class Main {
                                      "╘═════"}
     };
 
-    private static int numOfErrors = 7;
 
     public static void main(String[] args) {
-        readDictionaryInList();
         controlGame();
     }
 
     public static void controlGame() {
         if (getStartGame()) {
-            startGameRound();
+            if (tryCreateDictionary()) {
+                startGameRound();
+            }
         } else {
             scanner.close();
         }
     }
 
     public static void startGameRound() {
-        hiddenWordList.clear();
-        displayWordList.clear();
-        usedLettersList.clear();
+        hiddenWord.clear();
+        displayWord.clear();
+        usedLetters.clear();
         numOfErrors = 7;
 
         splitWordAsLetters(chooseHiddenWord());
 
-        for (char i : hiddenWordList){
-            displayWordList.add('*');
+        for (char i : hiddenWord){
+            displayWord.add('*');
         }
-        printHiddenWord(displayWordList);
+        printWord(displayWord);
         startGameLoop();
     }
 
     public static void startGameLoop() {
         while(true) {
-            char inputLetter = getPlayerLetter();
-            boolean haveLetter = checkLetterInWord(hiddenWordList, inputLetter);
+            char letter = getPlayerLetter();
+            boolean hasLetter = checkLetterInWord(letter);
             boolean gameOver = false;
-            printHiddenWord(displayWordList);
-            if (haveLetter) {
-                gameOver = checkWinInGame(displayWordList);
+            printWord(displayWord);
+            if (hasLetter) {
+                gameOver = isWin();
             } else {
                 numOfErrors--;
-                gameOver = checkLostInGame(numOfErrors);
-                drawHangman(numOfErrors);
+                gameOver = hasPlayerLost();
+                drawHangman();
             }
             if (gameOver) {
                 controlGame();
@@ -104,13 +109,14 @@ public class Main {
     //==================================================================================================================
     public static boolean getStartGame() {
         while (true) {
-            System.out.println("Введите <start> для начала новой игры, введите <exit> для выхода");
+            System.out.println("Введите <1> для начала новой игры, введите <0> для выхода");
 
             String inputWord = scanner.nextLine().toUpperCase();
 
-            if (inputWord.equals("START")) {
+            if (inputWord.equals(START)) {
                 return true;
-            } else if (inputWord.equals("EXIT")){
+            }
+            if (inputWord.equals(EXIT)) {
                 return false;
             }
         }
@@ -119,153 +125,138 @@ public class Main {
     public static void splitWordAsLetters(String hiddenWord) {
         char[] hiddenWordArray = hiddenWord.toCharArray();
         for (char letter : hiddenWordArray){
-            hiddenWordList.add(letter);
+            Main.hiddenWord.add(letter);
         }
     }
 
-    public static void readDictionaryInList(){
+    public static boolean tryCreateDictionary() {
         BufferedReader reader = null;
+        boolean isDictionaryRead = false;
         try {
-            reader = new BufferedReader(new FileReader("src/dictionary.txt"));
+            reader = new BufferedReader(new FileReader("src/dictionaryr.txt"));
             String line;
-
             while ((line = reader.readLine()) != null) {
-                dictionaryList.add(line.toUpperCase());
+                dictionary.add(line.toUpperCase());
             }
-
+            isDictionaryRead = true;
         } catch (IOException e) {
-            System.err.println("Ошибка чтения файла: " + e.getMessage());
+            System.err.println("Не удалось открыть файл словаря. Программа будет завершена.");
+            isDictionaryRead = false;
         } finally {
             try {
                 if (reader != null) {
                     reader.close();
                 }
             } catch (IOException e) {
-                System.err.println("Ошибка закрытия файла: " + e.getMessage());
+                System.err.println("Не удалось закрыть файл словаря. Программа будет завершена.");
+                isDictionaryRead = false;
+            } finally {
+                return isDictionaryRead;
             }
         }
     }
 
-    public static int getRandomNuber(int minNumber, int maxNumber) {
-        maxNumber -= minNumber;
-        return (int) (Math.random() * ++maxNumber) + minNumber;
-    }
-
     public static String chooseHiddenWord(){
-        int randomNumberWord = getRandomNuber(0, dictionaryList.size() - 1);
-        return dictionaryList.get(randomNumberWord);
+        Random random = new Random();
+        int randomNumberWord = random.nextInt(0, dictionary.size() - 1);
+        return dictionary.get(randomNumberWord);
     }
 
-    public static void printHiddenWord (List<Character> displayWordList) {
+    public static void printWord(List<Character> printWord) {
         System.out.print("Загаданное слово: ");
-        for (char letter : displayWordList){
-            System.out.print(letter);
+        for (char line : printWord){
+            System.out.print(line);
         }
         System.out.println();
     }
 
     //==================================================================================================================
     public static char getPlayerLetter() {
-        usedLettersList.add(getUserLetter());
-        printUsedLetters(usedLettersList);
-        return usedLettersList.get(usedLettersList.size() - 1);
+        usedLetters.add(inputLetter());
+        printUsedLetters();
+        return usedLetters.getLast();
     }
 
-    public static char getUserLetter() {
+    public static char inputLetter() {
         while (true) {
             System.out.println("");
             System.out.println("Введите букву");
 
-            char inputLetter = scanner.nextLine().charAt(0);
+            char letter = scanner.nextLine().charAt(0);
 
-            if (Character.isLetter(inputLetter)) {
-                char upCaseInputLetter = Character.toUpperCase(inputLetter);
-                boolean isLetterUsed = checkInputLetterUsed(upCaseInputLetter);
+            if (Character.isLetter(letter)) {
+                char upCaseLetter = Character.toUpperCase(letter);
+                boolean isLetterUsed = isUsedLetter(upCaseLetter);
 
                 if (isLetterUsed) {
                     System.out.println("Данная буква уже использовалась! Введите другую.");
                 } else {
-                    return upCaseInputLetter;
+                    return upCaseLetter;
                 }
             } else {
-                System.out.println("Вы ввели: " + inputLetter + ". Необходимо ввести букву.");
+                System.out.printf("Вы ввели: %s. Необходимо ввести букву. \n", letter);
             }
         }
     }
 
-    public static boolean checkInputLetterUsed(char inputLetter) {
-        for(char usedLetter : usedLettersList) {
-            if (inputLetter == usedLetter) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean isUsedLetter(char letter) {
+        return usedLetters.contains(letter);
     }
 
-    public static void printUsedLetters(List<Character> usedLettersList) {
+    public static void printUsedLetters() {
         System.out.print("Вы ввели: ");
-        for (char letter : usedLettersList) {
+        for (char letter : usedLetters) {
             System.out.print(letter + " ");
         }
         System.out.println();
         System.out.println();
     }
 
-    public static boolean checkLetterInWord(List<Character> hideWordList, char inLetter) {
+    public static boolean checkLetterInWord(char letter) {
 
-        if (hideWordList.contains(inLetter)) {
+        if (hiddenWord.contains(letter)) {
             System.out.println("Буква присутствует");
-            for (int index = 0; index < hideWordList.size(); index++) {
-                if (hideWordList.get(index) == inLetter){
-                    displayWordList.set(index, inLetter);
+            for (int index = 0; index < hiddenWord.size(); index++) {
+                if (hiddenWord.get(index) == letter){
+                    displayWord.set(index, letter);
                 }
             }
             return true;
-        } else {
-            System.out.println("Данная буква в слове отсутствует...");
-            return false;
         }
+
+        System.out.println("Данная буква в слове отсутствует...");
+        return false;
     }
 
-    public static boolean checkWinInGame (List<Character> displayWordList) {
-        if (!(displayWordList.contains('*'))) {
+    public static boolean isWin() {
+        if (!(displayWord.contains('*'))) {
             System.out.println("Вы виграли!!! Поздравляю!");
             System.out.println();
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
-    public static boolean checkLostInGame(int numOfErrors) {
-        switch (numOfErrors) {
-            case 6, 5:
-                System.out.println("Осталось " + numOfErrors + " ошибок.");
-                break;
-            case 4, 3, 2:
-                System.out.println("Осталось " + numOfErrors + " ошибки.");
-                break;
-            case 1:
-                System.out.println("Осталась " + numOfErrors + " ошибка.");
-                break;
-            default:
-                break;
+    public static boolean hasPlayerLost() {
+        if (numOfErrors < MAX_MISTAKES && numOfErrors > 0) {
+            System.out.printf("Осталось ошибок: %s \n", numOfErrors);
         }
 
         if (numOfErrors == 0) {
             System.out.println("Вы проиграли...");
-            printHiddenWord(hiddenWordList);
+            printWord(hiddenWord);
             System.out.println();
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
-    public static void drawHangman(int numOfErrors) {
-        int numOfDraw = (7 - numOfErrors) - 1;
+    public static void drawHangman() {
+        int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
         if (numOfDraw >= 0) {
-            for (String state : lostState[numOfDraw]){
+            for (String state : hangmanPictures[numOfDraw]){
                 System.out.println(state);
             }
         }
