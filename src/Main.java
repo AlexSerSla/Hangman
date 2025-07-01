@@ -20,40 +20,40 @@ public class Main {
     private static int numOfErrors = MAX_MISTAKES;
 
     private final static String[][] hangmanPictures = {{"┌───┐",
-                                    "│",
-                                    "│",
-                                    "│",
-                                    "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│",
-                                     "│",
-                                     "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│   |",
-                                     "│",
-                                     "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│  /|",
-                                     "│",
-                                     "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│  /|\\",
-                                     "│",
-                                     "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│  /|\\",
-                                     "│  / ",
-                                     "╘═════"},
-                                    {"┌───┐",
-                                     "│   О",
-                                     "│  /|\\",
-                                     "│  / \\",
-                                     "╘═════"}
+            "│",
+            "│",
+            "│",
+            "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│",
+                    "│",
+                    "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│   |",
+                    "│",
+                    "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│  /|",
+                    "│",
+                    "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│  /|\\",
+                    "│",
+                    "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│  /|\\",
+                    "│  / ",
+                    "╘═════"},
+            {"┌───┐",
+                    "│   О",
+                    "│  /|\\",
+                    "│  / \\",
+                    "╘═════"}
     };
 
 
@@ -62,12 +62,20 @@ public class Main {
     }
 
     public static void controlGame() {
-        if (getStartGame()) {
-            if (tryCreateDictionary()) {
-                startGameRound();
+        while (true) {
+            boolean isGameStart = getStartGame();
+            boolean isDictionaryCreated = false;
+
+            if (isGameStart) {
+                isDictionaryCreated = tryCreateDictionary();
             }
-        } else {
-            scanner.close();
+
+            if (isGameStart && isDictionaryCreated) {
+                startGameRound();
+            } else {
+                scanner.close();
+                break;
+            }
         }
     }
 
@@ -79,7 +87,7 @@ public class Main {
 
         splitWordAsLetters(chooseHiddenWord());
 
-        for (char i : hiddenWord){
+        for (char i : hiddenWord) {
             displayWord.add('*');
         }
         printWord(displayWord);
@@ -87,7 +95,7 @@ public class Main {
     }
 
     public static void startGameLoop() {
-        while(true) {
+        while (true) {
             char letter = getPlayerLetter();
             boolean hasLetter = checkLetterInWord(letter);
             boolean gameOver = false;
@@ -100,7 +108,6 @@ public class Main {
                 drawHangman();
             }
             if (gameOver) {
-                controlGame();
                 break;
             }
         }
@@ -124,7 +131,7 @@ public class Main {
 
     public static void splitWordAsLetters(String hiddenWord) {
         char[] hiddenWordArray = hiddenWord.toCharArray();
-        for (char letter : hiddenWordArray){
+        for (char letter : hiddenWordArray) {
             Main.hiddenWord.add(letter);
         }
     }
@@ -133,7 +140,7 @@ public class Main {
         BufferedReader reader = null;
         boolean isDictionaryRead = false;
         try {
-            reader = new BufferedReader(new FileReader("src/dictionaryr.txt"));
+            reader = new BufferedReader(new FileReader("src/dictionary.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
                 dictionary.add(line.toUpperCase());
@@ -156,7 +163,7 @@ public class Main {
         }
     }
 
-    public static String chooseHiddenWord(){
+    public static String chooseHiddenWord() {
         Random random = new Random();
         int randomNumberWord = random.nextInt(0, dictionary.size() - 1);
         return dictionary.get(randomNumberWord);
@@ -164,7 +171,7 @@ public class Main {
 
     public static void printWord(List<Character> printWord) {
         System.out.print("Загаданное слово: ");
-        for (char line : printWord){
+        for (char line : printWord) {
             System.out.print(line);
         }
         System.out.println();
@@ -217,7 +224,7 @@ public class Main {
         if (hiddenWord.contains(letter)) {
             System.out.println("Буква присутствует");
             for (int index = 0; index < hiddenWord.size(); index++) {
-                if (hiddenWord.get(index) == letter){
+                if (hiddenWord.get(index) == letter) {
                     displayWord.set(index, letter);
                 }
             }
@@ -256,7 +263,7 @@ public class Main {
     public static void drawHangman() {
         int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
         if (numOfDraw >= 0) {
-            for (String state : hangmanPictures[numOfDraw]){
+            for (String state : hangmanPictures[numOfDraw]) {
                 System.out.println(state);
             }
         }
