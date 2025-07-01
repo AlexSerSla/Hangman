@@ -62,15 +62,8 @@ public class Main {
     }
 
     public static void controlGame() {
-        while (true) {
-            boolean isGameStart = getStartGame();
-            boolean isDictionaryCreated = false;
-
-            if (isGameStart) {
-                isDictionaryCreated = tryCreateDictionary();
-            }
-
-            if (isGameStart && isDictionaryCreated) {
+        while (getStartGame()) {
+            if (tryCreateDictionary()) {
                 startGameRound();
             } else {
                 scanner.close();
@@ -96,12 +89,17 @@ public class Main {
 
     public static void startGameLoop() {
         while (!isGameOver()) {
-            char letter = getPlayerLetter();
+            char letter = inputLetter();
+            addToUsedLetters(letter);
+            printUsedLetters();
 
-            if (isHiddenWordLetter(letter)) {  //эта буква присутствует в слове?
+            if (hiddenWord.contains(letter)) {
+                System.out.println("Буква присутствует");
+                revealGuessedLetters(letter);
                 printWord(displayWord);
             } else {
                 numOfErrors--;
+                System.out.println("Данная буква в слове отсутствует...");
                 System.out.printf("Осталось ошибок: %s \n", numOfErrors);
                 drawHangman();
             }
@@ -121,7 +119,6 @@ public class Main {
     public static boolean getStartGame() {
         while (true) {
             System.out.println("Введите <1> для начала новой игры, введите <0> для выхода");
-
             String inputWord = scanner.nextLine().toUpperCase();
 
             if (inputWord.equals(START)) {
@@ -141,29 +138,21 @@ public class Main {
     }
 
     public static boolean tryCreateDictionary() {
-        BufferedReader reader = null;
-        boolean isDictionaryRead = false;
-        try {
-            reader = new BufferedReader(new FileReader("src/dictionary.txt"));
+        String filePath = "src/dictionary.txt";
+
+        try (FileReader fileReader = new FileReader(filePath);
+             BufferedReader reader = new BufferedReader(fileReader)) {
+
             String line;
+
             while ((line = reader.readLine()) != null) {
                 dictionary.add(line.toUpperCase());
             }
-            isDictionaryRead = true;
+            return true;
+
         } catch (IOException e) {
-            System.err.println("Не удалось открыть файл словаря. Программа будет завершена.");
-            isDictionaryRead = false;
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                System.err.println("Не удалось закрыть файл словаря. Программа будет завершена.");
-                isDictionaryRead = false;
-            } finally {
-                return isDictionaryRead;
-            }
+            System.err.println("Не удалось закрыть файл словаря. Программа будет завершена.");
+            return false;
         }
     }
 
@@ -181,13 +170,6 @@ public class Main {
         System.out.println();
     }
 
-    //==================================================================================================================
-    public static char getPlayerLetter() {
-        usedLetters.add(inputLetter());
-        printUsedLetters();
-        return usedLetters.getLast();
-    }
-
     public static char inputLetter() {
         while (true) {
             System.out.println("");
@@ -195,23 +177,26 @@ public class Main {
 
             char letter = scanner.nextLine().charAt(0);
 
-            if (Character.isLetter(letter)) {
+            //есть проблема с пустым нажатем на enter - выводит ошибку!!
+            //сделать как-то ошибку если введена не русская буква или несколько букв...
+
+            if (!Character.isLetter(letter)) {
+                System.out.printf("Вы ввели: %s. Необходимо ввести букву. \n", letter);
+            } else {
                 char upCaseLetter = Character.toUpperCase(letter);
-                boolean isLetterUsed = isUsedLetter(upCaseLetter);
+                boolean isLetterUsed = usedLetters.contains(upCaseLetter);
 
                 if (isLetterUsed) {
                     System.out.println("Данная буква уже использовалась! Введите другую.");
                 } else {
                     return upCaseLetter;
                 }
-            } else {
-                System.out.printf("Вы ввели: %s. Необходимо ввести букву. \n", letter);
             }
         }
     }
 
-    public static boolean isUsedLetter(char letter) {
-        return usedLetters.contains(letter);
+    private static void addToUsedLetters(char letter) {
+        usedLetters.add(letter);
     }
 
     public static void printUsedLetters() {
@@ -223,27 +208,10 @@ public class Main {
         System.out.println();
     }
 
-    public static boolean isHiddenWordLetter(char letter) {
-
-        if (hiddenWord.contains(letter)) {
-            System.out.println("Буква присутствует");
-            for (int index = 0; index < hiddenWord.size(); index++) {
-                if (hiddenWord.get(index) == letter) {
-                    displayWord.set(index, letter);
-                }
-            }
-            return true;
-        }
-
-        System.out.println("Данная буква в слове отсутствует...");
-        return false;
-    }
-
-    public static void drawHangman() {
-        int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
-        if (numOfDraw >= 0) {
-            for (String state : hangmanPictures[numOfDraw]) {
-                System.out.println(state);
+    public static void revealGuessedLetters(char letter) {
+        for (int index = 0; index < hiddenWord.size(); index++) {
+            if (hiddenWord.get(index) == letter) {
+                displayWord.set(index, letter);
             }
         }
     }
@@ -258,6 +226,15 @@ public class Main {
 
     private static boolean isGameOver() {
         return isWin() || isLose();
+    }
+
+    public static void drawHangman() {
+        int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
+        if (numOfDraw >= 0) {
+            for (String state : hangmanPictures[numOfDraw]) {
+                System.out.println(state);
+            }
+        }
     }
 
 }
