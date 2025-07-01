@@ -83,7 +83,7 @@ public class Main {
         hiddenWord.clear();
         displayWord.clear();
         usedLetters.clear();
-        numOfErrors = 7;
+        numOfErrors = MAX_MISTAKES;
 
         splitWordAsLetters(chooseHiddenWord());
 
@@ -95,20 +95,24 @@ public class Main {
     }
 
     public static void startGameLoop() {
-        while (true) {
+        while (!isGameOver()) {
             char letter = getPlayerLetter();
-            boolean hasLetter = checkLetterInWord(letter);
-            boolean gameOver = false;
-            printWord(displayWord);
-            if (hasLetter) {
-                gameOver = isWin();
+
+            if (isHiddenWordLetter(letter)) {  //эта буква присутствует в слове?
+                printWord(displayWord);
             } else {
                 numOfErrors--;
-                gameOver = hasPlayerLost();
+                System.out.printf("Осталось ошибок: %s \n", numOfErrors);
                 drawHangman();
             }
-            if (gameOver) {
-                break;
+
+            if(isWin()) {
+                System.out.println("Вы выиграли!!! Поздравляю!");
+                System.out.println();
+            } else if (isLose()) {
+                System.out.println("Вы проиграли...");
+                printWord(hiddenWord);
+                System.out.println();
             }
         }
     }
@@ -219,7 +223,7 @@ public class Main {
         System.out.println();
     }
 
-    public static boolean checkLetterInWord(char letter) {
+    public static boolean isHiddenWordLetter(char letter) {
 
         if (hiddenWord.contains(letter)) {
             System.out.println("Буква присутствует");
@@ -235,31 +239,6 @@ public class Main {
         return false;
     }
 
-    public static boolean isWin() {
-        if (!(displayWord.contains('*'))) {
-            System.out.println("Вы виграли!!! Поздравляю!");
-            System.out.println();
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean hasPlayerLost() {
-        if (numOfErrors < MAX_MISTAKES && numOfErrors > 0) {
-            System.out.printf("Осталось ошибок: %s \n", numOfErrors);
-        }
-
-        if (numOfErrors == 0) {
-            System.out.println("Вы проиграли...");
-            printWord(hiddenWord);
-            System.out.println();
-            return true;
-        }
-
-        return false;
-    }
-
     public static void drawHangman() {
         int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
         if (numOfDraw >= 0) {
@@ -268,4 +247,17 @@ public class Main {
             }
         }
     }
+
+    public static boolean isWin() {
+        return !(displayWord.contains('*'));
+    }
+
+    public static boolean isLose() {
+        return numOfErrors == 0;
+    }
+
+    private static boolean isGameOver() {
+        return isWin() || isLose();
+    }
+
 }
