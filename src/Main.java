@@ -130,10 +130,10 @@ public class Main {
         }
     }
 
-    public static void splitWordAsLetters(String hiddenWord) {
-        char[] hiddenWordArray = hiddenWord.toCharArray();
+    public static void splitWordAsLetters(String word) {
+        char[] hiddenWordArray = word.toCharArray();
         for (char letter : hiddenWordArray) {
-            Main.hiddenWord.add(letter);
+            hiddenWord.add(letter);
         }
     }
 
@@ -175,21 +175,25 @@ public class Main {
             System.out.println("");
             System.out.println("Введите букву");
 
-            char letter = scanner.nextLine().charAt(0);
+            String input = scanner.nextLine();
 
-            //есть проблема с пустым нажатем на enter - выводит ошибку!!
-            //сделать как-то ошибку если введена не русская буква или несколько букв...
+            if (input.length() != 1) {
+                System.out.println("Необходимо ввести 1 символ.");
+                continue;
+            }
 
-            if (!Character.isLetter(letter)) {
-                System.out.printf("Вы ввели: %s. Необходимо ввести букву. \n", letter);
+            boolean isRussianLetter = input.matches("[а-яА-ЯёЁ]+");
+
+            if (!isRussianLetter) {
+                System.out.printf("Вы ввели: %s. Необходимо ввести русскую букву. \n", input);
             } else {
-                char upCaseLetter = Character.toUpperCase(letter);
-                boolean isLetterUsed = usedLetters.contains(upCaseLetter);
+                char upperCaseLetter = input.toUpperCase().charAt(0);
+                boolean isLetterUsed = usedLetters.contains(upperCaseLetter);
 
                 if (isLetterUsed) {
                     System.out.println("Данная буква уже использовалась! Введите другую.");
                 } else {
-                    return upCaseLetter;
+                    return upperCaseLetter;
                 }
             }
         }
