@@ -6,56 +6,18 @@ import java.util.*;
 
 public class Main {
 
-    private final static Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
 
-    private final static List<String> dictionary = new ArrayList<>();
-    private final static List<Character> usedLetters = new ArrayList<>();
-    private final static List<Character> hiddenWord = new ArrayList<>();
-    private final static List<Character> displayWord = new ArrayList<>();
+    private static final List<String> dictionary = new ArrayList<>();
+    private static final List<Character> usedLetters = new ArrayList<>();
+    private static final List<Character> hiddenWord = new ArrayList<>();
+    private static final List<Character> displayWord = new ArrayList<>();
 
-    private final static String START = "1";
-    private final static String EXIT = "0";
-    private final static int MAX_MISTAKES = 7;
+    private static final String START = "1";
+    private static final String EXIT = "0";
 
+    private static final int MAX_MISTAKES = 7;
     private static int numOfErrors = MAX_MISTAKES;
-
-    private final static String[][] hangmanPictures = {{"┌───┐",
-            "│",
-            "│",
-            "│",
-            "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│",
-                    "│",
-                    "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│   |",
-                    "│",
-                    "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│  /|",
-                    "│",
-                    "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│  /|\\",
-                    "│",
-                    "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│  /|\\",
-                    "│  / ",
-                    "╘═════"},
-            {"┌───┐",
-                    "│   О",
-                    "│  /|\\",
-                    "│  / \\",
-                    "╘═════"}
-    };
-
 
     public static void main(String[] args) {
         controlGame();
@@ -89,7 +51,7 @@ public class Main {
 
     public static void startGameLoop() {
         while (!isGameOver()) {
-            char letter = inputLetter();
+            char letter = inputUpperCaseLetter();
             addToUsedLetters(letter);
             printUsedLetters();
 
@@ -101,7 +63,8 @@ public class Main {
                 numOfErrors--;
                 System.out.println("Данная буква в слове отсутствует...");
                 System.out.printf("Осталось ошибок: %s \n", numOfErrors);
-                drawHangman();
+
+                HangmanPrinter.drawHangman(MAX_MISTAKES, numOfErrors);
             }
 
             if(isWin()) {
@@ -170,7 +133,7 @@ public class Main {
         System.out.println();
     }
 
-    public static char inputLetter() {
+    public static char inputUpperCaseLetter() {
         while (true) {
             System.out.println("");
             System.out.println("Введите букву");
@@ -231,14 +194,4 @@ public class Main {
     private static boolean isGameOver() {
         return isWin() || isLose();
     }
-
-    public static void drawHangman() {
-        int numOfDraw = (MAX_MISTAKES - numOfErrors) - 1;
-        if (numOfDraw >= 0) {
-            for (String state : hangmanPictures[numOfDraw]) {
-                System.out.println(state);
-            }
-        }
-    }
-
 }
