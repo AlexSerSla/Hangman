@@ -23,7 +23,7 @@ public class Main {
         controlGame();
     }
 
-    public static void controlGame() {
+    private static void controlGame() {
         while (getStartGame()) {
             if (tryCreateDictionary()) {
                 startGameRound();
@@ -34,7 +34,7 @@ public class Main {
         }
     }
 
-    public static void startGameRound() {
+    private static void startGameRound() {
         hiddenWord.clear();
         displayWord.clear();
         usedLetters.clear();
@@ -49,7 +49,7 @@ public class Main {
         startGameLoop();
     }
 
-    public static void startGameLoop() {
+    private static void startGameLoop() {
         while (!isGameOver()) {
             char letter = inputUpperCaseLetter();
             addToUsedLetters(letter);
@@ -78,8 +78,7 @@ public class Main {
         }
     }
 
-    //==================================================================================================================
-    public static boolean getStartGame() {
+    private static boolean getStartGame() {
         while (true) {
             System.out.println("Введите <1> для начала новой игры, введите <0> для выхода");
             String inputWord = scanner.nextLine().toUpperCase();
@@ -93,14 +92,14 @@ public class Main {
         }
     }
 
-    public static void splitWordAsLetters(String word) {
+    private static void splitWordAsLetters(String word) {
         char[] hiddenWordArray = word.toCharArray();
         for (char letter : hiddenWordArray) {
             hiddenWord.add(letter);
         }
     }
 
-    public static boolean tryCreateDictionary() {
+    private static boolean tryCreateDictionary() {
         String filePath = "src/dictionary.txt";
 
         try (FileReader fileReader = new FileReader(filePath);
@@ -119,13 +118,13 @@ public class Main {
         }
     }
 
-    public static String chooseHiddenWord() {
+    private static String chooseHiddenWord() {
         Random random = new Random();
         int randomNumberWord = random.nextInt(0, dictionary.size() - 1);
         return dictionary.get(randomNumberWord);
     }
 
-    public static void printWord(List<Character> printWord) {
+    private static void printWord(List<Character> printWord) {
         System.out.print("Загаданное слово: ");
         for (char line : printWord) {
             System.out.print(line);
@@ -133,7 +132,7 @@ public class Main {
         System.out.println();
     }
 
-    public static char inputUpperCaseLetter() {
+    private static char inputUpperCaseLetter() {
         while (true) {
             System.out.println("");
             System.out.println("Введите букву");
@@ -166,7 +165,7 @@ public class Main {
         usedLetters.add(letter);
     }
 
-    public static void printUsedLetters() {
+    private static void printUsedLetters() {
         System.out.print("Вы ввели: ");
         for (char letter : usedLetters) {
             System.out.print(letter + " ");
@@ -175,7 +174,7 @@ public class Main {
         System.out.println();
     }
 
-    public static void revealGuessedLetters(char letter) {
+    private static void revealGuessedLetters(char letter) {
         for (int index = 0; index < hiddenWord.size(); index++) {
             if (hiddenWord.get(index) == letter) {
                 displayWord.set(index, letter);
@@ -183,11 +182,11 @@ public class Main {
         }
     }
 
-    public static boolean isWin() {
+    private static boolean isWin() {
         return !(displayWord.contains('*'));
     }
 
-    public static boolean isLose() {
+    private static boolean isLose() {
         return numOfErrors == 0;
     }
 
